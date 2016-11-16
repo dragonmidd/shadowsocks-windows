@@ -57,6 +57,7 @@ namespace Shadowsocks.View
         private HotkeySettingsForm hotkeySettingsForm;
         private string _urlToOpen;
 
+        private Timer getServerFromInternetTimer;
         public MenuViewController(ShadowsocksController controller)
         {
             this.controller = controller;
@@ -101,6 +102,11 @@ namespace Shadowsocks.View
                 _isStartupChecking = true;
                 updateChecker.CheckUpdate(config, 3000);
             }
+
+            this.getServerFromInternetTimer = new Timer();
+            this.getServerFromInternetTimer.Interval = 2000*60;
+            this.getServerFromInternetTimer.Tick += new System.EventHandler(this.GetServerFromInternetTimer_Tick);
+            this.getServerFromInternetTimer.Enabled = true;
         }
 
         private void controller_TrafficChanged(object sender, EventArgs e)
@@ -542,6 +548,7 @@ namespace Shadowsocks.View
         {
             controller.Stop();
             _notifyIcon.Visible = false;
+            getServerFromInternetTimer.Dispose();
             Application.Exit();
         }
 
@@ -848,6 +855,11 @@ namespace Shadowsocks.View
         public void ShowLogForm_HotKey()
         {
             ShowLogForm();
+        }
+
+        private void GetServerFromInternetTimer_Tick(object sender, EventArgs e)
+        {
+            controller.GetServerFromInternet();
         }
     }
 }

@@ -7,6 +7,9 @@ using System.Text;
 using System.Threading;
 using Newtonsoft.Json;
 
+//
+using System.Text.RegularExpressions;
+
 using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
@@ -90,6 +93,7 @@ namespace Shadowsocks.Controller
             _strategyManager = new StrategyManager(this);
             StartReleasingMemory();
             StartTrafficStatistics(61);
+            GetServerFromInternet();
         }
 
         public void Start()
@@ -496,6 +500,74 @@ namespace Shadowsocks.Controller
             Configuration.Save(newConfig);
             Reload();
         }
+
+        public void GetServerFromInternet()
+        {
+            //get servers from internet
+            List<Server> servers = new List<Server>();
+            System.Net.WebClient client = new System.Net.WebClient();
+
+            try
+            {
+                byte[] page = client.DownloadData("http://www.ishadowsocks.org");
+                string content = System.Text.Encoding.UTF8.GetString(page);
+
+                Regex reg = new Regex(@"<h4>\w服务器地址:([^<]+)</h4>[^<]*<h4>端口:([^<]+)</h4>[^<]*<h4>\w密码:([^<]+)</h4>[^<]*<h4>加密方式:([^<]+)</h4>", RegexOptions.IgnoreCase);
+                Match m = reg.Match(content);
+            
+                while (m.Success)
+                {
+                    Server server = new Server();
+                    server.server = m.Result("$1");
+                    int.TryParse(m.Result("$2"), out server.server_port);
+                    server.password = m.Result("$3");
+                    server.method = m.Result("$4");
+                    servers.Add(server);
+                    m = m.NextMatch();
+                }
+            }
+            catch(Exception e)
+            {
+                Logging.Error(e);
+            }
+            finally{}
+            this.SaveChangedServers(servers);
+        }
+
+        protected void SaveChangedServers(List<Server> servers)
+        {
+            bool needSave = false;
+            bool needReload = false;
+           
+            _config.configs.RemoveAll(x=>x.server.IsNullOrEmpty());
+            foreach(Server serverToSave in servers)
+            {
+                int index = _config.configs.FindIndex(x=>x.server.Equals(serverToSave.server, StringComparison.OrdinalIgnoreCase)&&x.server_port==serverToSave.server_port);
+                if(index >= 0)
+                {
+                    Server server = _config.configs[index];
+                    if(server.password != serverToSave.password || !server.method.Equals(serverToSave.method, StringComparison.OrdinalIgnoreCase))
+                    {
+                        server.password = serverToSave.password;
+                        server.method = serverToSave.method;
+                        needSave = true;
+                        if(_config.index == index || GetCurrentStrategy()!=null) needReload = true;
+                        Logging.Info(string.Format("server[{0}:{1}] password or method changed, reload[{2}]", server.server, server.server_port, needReload));
+                    }
+                }
+                else
+                {
+                    if(_config.configs.Count==0 || GetCurrentStrategy()!=null) needReload = true;
+                    _config.configs.Add(serverToSave);
+                    needSave = true;
+                    Logging.Info(string.Format("add new server[{0}:{1}], reload[{2}, save[{3}]", serverToSave.server, serverToSave.server_port, needReload, needSave));
+                }
+            }
+            
+
+            if(needSave)Configuration.Save(_config);
+            if(needReload) Reload();
+        }      
 
         private void UpdateSystemProxy()
         {
