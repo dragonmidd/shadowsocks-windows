@@ -522,6 +522,7 @@ namespace Shadowsocks.Controller
                     int.TryParse(m.Result("$2"), out server.server_port);
                     server.password = m.Result("$3");
                     server.method = m.Result("$4");
+                    server.remarks = "from_iss";
                     servers.Add(server);
                     m = m.NextMatch();
                 }
@@ -536,16 +537,23 @@ namespace Shadowsocks.Controller
 
         protected void SaveChangedServers(List<Server> servers)
         {
+            if(servers.Count <= 0) return;
             bool needSave = false;
             bool needReload = false;
-           
+  
             _config.configs.RemoveAll(x=>x.server.IsNullOrEmpty());
+            foreach(Server serverSaved in _config.configs)
+            {
+                if(serverSaved.remarks=="from_iss") serverSaved.remarks="from_iss_delete";
+            }
+
             foreach(Server serverToSave in servers)
             {
                 int index = _config.configs.FindIndex(x=>x.server.Equals(serverToSave.server, StringComparison.OrdinalIgnoreCase)&&x.server_port==serverToSave.server_port);
                 if(index >= 0)
                 {
                     Server server = _config.configs[index];
+                    server.remarks = serverToSave.remarks;
                     if(server.password != serverToSave.password || !server.method.Equals(serverToSave.method, StringComparison.OrdinalIgnoreCase))
                     {
                         server.password = serverToSave.password;
@@ -564,7 +572,7 @@ namespace Shadowsocks.Controller
                 }
             }
             
-
+            if( _config.configs.RemoveAll(x=>x.remarks=="from_iss_delete")>0) needSave = true;
             if(needSave)Configuration.Save(_config);
             if(needReload) Reload();
         }      

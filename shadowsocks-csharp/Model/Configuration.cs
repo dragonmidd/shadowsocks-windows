@@ -69,6 +69,15 @@ namespace Shadowsocks.Model
                 {
                     config.proxy.proxyType = ProxyConfig.PROXY_SOCKS5;
                 }
+
+                if (config.configs.Count == 0)
+                {
+                    config.configs = new List<Server>()
+                    {
+                        GetDefaultServer()
+                    };
+                }
+
                 return config;
             }
             catch (Exception e)

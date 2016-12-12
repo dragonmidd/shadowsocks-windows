@@ -104,7 +104,7 @@ namespace Shadowsocks.View
             }
 
             this.getServerFromInternetTimer = new Timer();
-            this.getServerFromInternetTimer.Interval = 2000*60;
+            this.getServerFromInternetTimer.Interval = 1000*60;
             this.getServerFromInternetTimer.Tick += new System.EventHandler(this.GetServerFromInternetTimer_Tick);
             this.getServerFromInternetTimer.Enabled = true;
         }
