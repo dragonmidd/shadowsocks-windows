@@ -553,11 +553,8 @@ namespace Shadowsocks.Controller
                 if(index >= 0)
                 {
                     Server server = _config.configs[index];
-                    if(server.remarks.IsNullOrEmpty())
-                    {
-                        server.remarks = serverToSave.remarks;
-                        needSave = true;
-                    }
+                    if(server.remarks!="from_iss" && server.remarks!="from_iss_delete") needSave = true;
+                    server.remarks = serverToSave.remarks;                   
 
                     if(server.password != serverToSave.password || !server.method.Equals(serverToSave.method, StringComparison.OrdinalIgnoreCase))
                     {
