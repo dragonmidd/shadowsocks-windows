@@ -1,0 +1,57 @@
+{
+  "configs": [
+    {
+      "server": "a.usip.pro",
+      "server_port": 443,
+      "password": "49321338",
+      "method": "aes-256-cfb",
+      "remarks": "from_iss",
+      "auth": false,
+      "timeout": 5
+    },
+  ],
+  "strategy": "com.shadowsocks.strategy.ha",
+  "index": -1,
+  "global": false,
+  "enabled": true,
+  "shareOverLan": false,
+  "isDefault": false,
+  "localPort": 1080,
+  "pacUrl": null,
+  "useOnlinePac": false,
+  "availabilityStatistics": false,
+  "autoCheckUpdate": true,
+  "isVerboseLogging": false,
+  "logViewer": {
+    "fontName": "Consolas",
+    "fontSize": 8.0,
+    "bgColor": "black",
+    "textColor": "white",
+    "topMost": false,
+    "wrapText": false,
+    "toolbarShown": false,
+    "width": 600,
+    "height": 400,
+    "top": 602,
+    "left": 1080,
+    "maximized": true
+  },
+  "proxy": {
+    "useProxy": false,
+    "proxyType": 0,
+    "proxyServer": "",
+    "proxyPort": 0,
+    "proxyTimeout": 3
+  },
+  "hotkey": {
+    "SwitchSystemProxy": "",
+    "ChangeToPac": "",
+    "ChangeToGlobal": "",
+    "SwitchAllowLan": "",
+    "ShowLogs": "",
+    "ServerMoveUp": "",
+    "ServerMoveDown": ""
+  },
+  "freeServerWebUrl": "http://www.ishadowsocks.org",
+  "crawlRule": "<h4>[^I]*IP Address:<span[^>]*>([^<]+)</span>.+[^<]+<h4>Port：([^<]+)</h4>.+[^<]+<h4>Password[^>]+>([^<]+)</span>.+[^<]+<h4>Method:([^<]+)</h4>"
+}
