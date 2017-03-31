@@ -503,16 +503,18 @@ namespace Shadowsocks.Controller
 
         public void GetServerFromInternet()
         {
-            //get servers from internet
+            //get free servers from internet
+            if(_config.freeServerWebUrl.IsNullOrEmpty()) return;
             List<Server> servers = new List<Server>();
             System.Net.WebClient client = new System.Net.WebClient();
 
             try
             {
-                byte[] page = client.DownloadData("http://www.ishadowsocks.org");
+                byte[] page = client.DownloadData(_config.freeServerWebUrl);
                 string content = System.Text.Encoding.UTF8.GetString(page);
 
-                Regex reg = new Regex(@"<h4>\w服务器地址:([^<]+)</h4>[^<]*<h4>端口:([^<]+)</h4>[^<]*<h4>\w密码:([^<]+)</h4>[^<]*<h4>加密方式:([^<]+)</h4>", RegexOptions.IgnoreCase);
+                //Regex reg = new Regex(@"<h4>\w服务器地址:([^<]+)</h4>[^<]*<h4>端口:([^<]+)</h4>[^<]*<h4>\w密码:([^<]+)</h4>[^<]*<h4>加密方式:([^<]+)</h4>", RegexOptions.IgnoreCase);
+                Regex reg = new Regex(@_config.crawlRule, RegexOptions.IgnoreCase);
                 Match m = reg.Match(content);
             
                 while (m.Success)
@@ -523,7 +525,7 @@ namespace Shadowsocks.Controller
                     server.password = m.Result("$3");
                     server.method = m.Result("$4");
                     server.remarks = "from_iss";
-                    servers.Add(server);
+                    servers.Add(server);    
                     m = m.NextMatch();
                 }
             }
