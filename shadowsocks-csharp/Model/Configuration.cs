@@ -30,6 +30,7 @@ namespace Shadowsocks.Model
         public HotkeyConfig hotkey;
         public string freeServerWebUrl;
         public string crawlRule;
+        public int crawlInterval;
 
         private static string CONFIG_FILE = "gui-config.json";
 
@@ -80,6 +81,9 @@ namespace Shadowsocks.Model
                     };
                 }
 
+                if (config.crawlInterval < 120)
+                    config.crawlInterval = 120;
+
                 return config;
             }
             catch (Exception e)
@@ -95,7 +99,8 @@ namespace Shadowsocks.Model
                     configs = new List<Server>()
                     {
                         GetDefaultServer()
-                    }
+                    },
+                    crawlInterval = 0
                 };
             }
         }

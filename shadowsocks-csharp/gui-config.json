@@ -20,7 +20,7 @@
   "pacUrl": null,
   "useOnlinePac": false,
   "availabilityStatistics": false,
-  "autoCheckUpdate": true,
+  "autoCheckUpdate": false,
   "isVerboseLogging": false,
   "logViewer": {
     "fontName": "Consolas",
@@ -53,5 +53,6 @@
     "ServerMoveDown": ""
   },
   "freeServerWebUrl": "http://www.ishadowsocks.org",
-  "crawlRule": "<h4>[^I]*IP Address:<span[^>]*>([^<]+)</span>.+[^<]+<h4>Port：([^<]+)</h4>.+[^<]+<h4>Password[^>]+>([^<]+)</span>.+[^<]+<h4>Method:([^<]+)</h4>"
+  "crawlRule": "<h4>[^I]*IP Address:<span[^>]*>([^<]+)</span>.+[^<]+<h4>Port：([^<]+)</h4>.+[^<]+<h4>Password[^>]+>([^<]+)</span>.+[^<]+<h4>Method:([^<]+)</h4>",
+  "crawlInterval":120
 }
