@@ -28,9 +28,12 @@ namespace Shadowsocks.Model
         public LogViewerConfig logViewer;
         public ProxyConfig proxy;
         public HotkeyConfig hotkey;
-        public string freeServerWebUrl;
-        public string crawlRule;
-        public int crawlInterval;
+
+        //public string freeServerWebUrl;
+        //public string crawlRule;
+        
+        public List<FreeServerGrab> freeServerGrabs;
+        public int grabInterval;
 
         private static string CONFIG_FILE = "gui-config.json";
 
@@ -81,8 +84,8 @@ namespace Shadowsocks.Model
                     };
                 }
 
-                if (config.crawlInterval < 120)
-                    config.crawlInterval = 120;
+                if (config.grabInterval < 120)
+                    config.grabInterval = 120;
 
                 return config;
             }
@@ -100,7 +103,7 @@ namespace Shadowsocks.Model
                     {
                         GetDefaultServer()
                     },
-                    crawlInterval = 0
+                    grabInterval = 0
                 };
             }
         }

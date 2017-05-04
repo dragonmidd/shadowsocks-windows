@@ -103,10 +103,10 @@ namespace Shadowsocks.View
                 updateChecker.CheckUpdate(config, 3000);
             }
 
-            if(config.crawlInterval>0)
+            if(config.grabInterval>0)
             {
                 this.getServerFromInternetTimer = new Timer();
-                this.getServerFromInternetTimer.Interval = config.crawlInterval * 1000;
+                this.getServerFromInternetTimer.Interval = config.grabInterval * 1000;
                 this.getServerFromInternetTimer.Tick += new System.EventHandler(this.GetServerFromInternetTimer_Tick);
                 this.getServerFromInternetTimer.Enabled = true;
             }

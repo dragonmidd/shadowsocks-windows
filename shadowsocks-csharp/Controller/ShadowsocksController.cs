@@ -504,36 +504,43 @@ namespace Shadowsocks.Controller
         public void GetServerFromInternet()
         {
             //get free servers from internet
-            if(_config.freeServerWebUrl.IsNullOrEmpty()) return;
+            if (_config.freeServerGrabs.Count == 0) return;
             List<Server> servers = new List<Server>();
             System.Net.WebClient client = new System.Net.WebClient();
 
-            try
+            //todo
+            foreach (FreeServerGrab fsb in _config.freeServerGrabs)
             {
-                byte[] page = client.DownloadData(_config.freeServerWebUrl);
-                string content = System.Text.Encoding.UTF8.GetString(page);
-
-                //Regex reg = new Regex(@"<h4>\w服务器地址:([^<]+)</h4>[^<]*<h4>端口:([^<]+)</h4>[^<]*<h4>\w密码:([^<]+)</h4>[^<]*<h4>加密方式:([^<]+)</h4>", RegexOptions.IgnoreCase);
-                Regex reg = new Regex(@_config.crawlRule, RegexOptions.IgnoreCase);
-                Match m = reg.Match(content);
-            
-                while (m.Success)
+                if (fsb.target_website.IsNullOrEmpty() || fsb.rule.IsNullOrEmpty()) return;
+                try
                 {
-                    Server server = new Server();
-                    server.server = m.Result("$1");
-                    int.TryParse(m.Result("$2"), out server.server_port);
-                    server.password = m.Result("$3");
-                    server.method = m.Result("$4");
-                    server.remarks = "from_iss";
-                    servers.Add(server);    
-                    m = m.NextMatch();
+                    byte[] page = client.DownloadData(fsb.target_website);
+                    string content = System.Text.Encoding.UTF8.GetString(page);
+
+                    //Regex reg = new Regex(@"<h4>\w服务器地址:([^<]+)</h4>[^<]*<h4>端口:([^<]+)</h4>[^<]*<h4>\w密码:([^<]+)</h4>[^<]*<h4>加密方式:([^<]+)</h4>", RegexOptions.IgnoreCase);
+                    Regex reg = new Regex(@fsb.rule, RegexOptions.IgnoreCase);
+                    Match m = reg.Match(content);
+
+                    while (m.Success)
+                    {
+                        Server server = new Server();
+                        server.server = m.Result("$1");
+                        int.TryParse(m.Result("$2"), out server.server_port);
+                        server.password = m.Result("$3");
+                        server.method = m.Result("$4");
+                        server.remarks = "grabbed";
+                        servers.Add(server);
+                        m = m.NextMatch();
+                    }
                 }
+                catch (Exception e)
+                {
+                    Logging.Error(e);
+                }
+                finally { }
+                
             }
-            catch(Exception e)
-            {
-                Logging.Error(e);
-            }
-            finally{}
+
             this.SaveChangedServers(servers);
         }
 
@@ -546,7 +553,7 @@ namespace Shadowsocks.Controller
             _config.configs.RemoveAll(x=>x.server.IsNullOrEmpty());
             foreach(Server serverSaved in _config.configs)
             {
-                if(serverSaved.remarks=="from_iss") serverSaved.remarks="from_iss_delete";
+                if(serverSaved.remarks== "grabbed") serverSaved.remarks= "grabbed_delete";
             }
 
             foreach(Server serverToSave in servers)
@@ -555,7 +562,7 @@ namespace Shadowsocks.Controller
                 if(index >= 0)
                 {
                     Server server = _config.configs[index];
-                    if(server.remarks!="from_iss" && server.remarks!="from_iss_delete") needSave = true;
+                    if(server.remarks!= "grabbed" && server.remarks!= "grabbed_delete") needSave = true;
                     server.remarks = serverToSave.remarks;                   
 
                     if(server.password != serverToSave.password || !server.method.Equals(serverToSave.method, StringComparison.OrdinalIgnoreCase))
@@ -576,7 +583,7 @@ namespace Shadowsocks.Controller
                 }
             }
             
-            if( _config.configs.RemoveAll(x=>x.remarks=="from_iss_delete")>0) needSave = true;
+            if( _config.configs.RemoveAll(x=>x.remarks== "grabbed_delete") >0) needSave = true;
             if(needSave)Configuration.Save(_config);
             if(needReload) Reload();
         }      
