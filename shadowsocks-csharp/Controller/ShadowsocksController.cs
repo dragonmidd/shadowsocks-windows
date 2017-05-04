@@ -511,7 +511,7 @@ namespace Shadowsocks.Controller
             //todo
             foreach (FreeServerGrab fsb in _config.freeServerGrabs)
             {
-                if (fsb.target_website.IsNullOrEmpty() || fsb.rule.IsNullOrEmpty()) return;
+                if (fsb.target_website.IsNullOrEmpty() || fsb.rule.IsNullOrEmpty()) continue;
                 try
                 {
                     byte[] page = client.DownloadData(fsb.target_website);
