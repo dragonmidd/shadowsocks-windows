@@ -14,6 +14,7 @@ using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
+using System.Net.Security;
 
 namespace Shadowsocks.Controller
 {
@@ -514,6 +515,21 @@ namespace Shadowsocks.Controller
                 if (fsb.target_website.IsNullOrEmpty() || fsb.rule.IsNullOrEmpty()) continue;
                 try
                 {
+                    if (fsb.target_website.Substring(0, 5) == "https")
+                    {
+                        // 解决WebClient不能通过https下载内容问题
+                        //System.Net.ServicePointManager.ServerCertificateValidationCallback +=
+                        //    delegate (object sender, System.Security.Cryptography.X509Certificates.X509Certificate certificate,
+                        //             System.Security.Cryptography.X509Certificates.X509Chain chain,
+                        //             System.Net.Security.SslPolicyErrors sslPolicyErrors)
+                        //    {
+                        //        return true; // **** Always accept
+                        //    };
+                        ServicePointManager.ServerCertificateValidationCallback += delegate { return true; };
+                       
+                    }
+
+                    
                     byte[] page = client.DownloadData(fsb.target_website);
                     string content = System.Text.Encoding.UTF8.GetString(page);
 
